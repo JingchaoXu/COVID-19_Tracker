@@ -71,15 +71,15 @@ public class COVIDDataService {
 
             //System.out.println(locationStats);
             locationStatsAccessService.save(locationStats);
-            locationStatsAccessService.
+
         }
 
     }
 
-    @Transactional
-    public void updataData(){
-
-    }
+//    @Transactional
+//    public void updataData(){
+//
+//    }
 
     @Transactional(readOnly = true)
     public List<LocationStats> getData(){
