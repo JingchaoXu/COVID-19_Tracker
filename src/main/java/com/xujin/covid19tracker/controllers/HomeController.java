@@ -21,12 +21,12 @@ public class HomeController {
     @GetMapping("/home")
     public String home(Model model){
 
-        model.addAttribute("locationStats",covidDataService.getAllStats());
-        model.addAttribute("totalReportedCases",covidDataService.getAllStats()
+        model.addAttribute("locationStats",covidDataService.getData());
+        model.addAttribute("totalReportedCases",covidDataService.getData()
                 .stream()
                 .mapToInt(num -> num.getLatestTotalCases())
                 .sum());
-        model.addAttribute("totalNewCases",covidDataService.getAllStats()
+        model.addAttribute("totalNewCases",covidDataService.getData()
                 .stream()
                 .mapToInt(num -> num.getDiffFromPrevDay())
                 .sum());

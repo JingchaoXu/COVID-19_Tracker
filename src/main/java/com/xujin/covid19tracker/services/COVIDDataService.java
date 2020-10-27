@@ -1,10 +1,13 @@
 package com.xujin.covid19tracker.services;
 
+import com.xujin.covid19tracker.Repo.LocationStatsAccessService;
 import com.xujin.covid19tracker.models.LocationStats;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.io.FileReader;
@@ -18,21 +21,32 @@ import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
+@Transactional
 public class COVIDDataService {
 
     private static String COVID_DATA_URL = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
 
-    private List<LocationStats> allStats = new ArrayList<>();
+    //private List<LocationStats> allStats = new ArrayList<>();
 
-    public List<LocationStats> getAllStats() {
-        return allStats;
+    private final LocationStatsAccessService locationStatsAccessService;
+
+//    public List<LocationStats> getAllStats() {
+//        return allStats;
+//    }
+
+    @Autowired
+    public COVIDDataService(LocationStatsAccessService locationStatsAccessService){
+        this.locationStatsAccessService = locationStatsAccessService;
     }
+
 
     @PostConstruct
     @Scheduled(cron="* * 1 * * *")
+    @Transactional
     public void fetchVirusData() throws IOException, InterruptedException {
         List<LocationStats> newStats = new ArrayList<>();
         HttpClient client = HttpClient.newHttpClient();
@@ -56,9 +70,22 @@ public class COVIDDataService {
             locationStats.setDiffFromPrevDay(latestDayNum-pervDayNum);
 
             //System.out.println(locationStats);
-            newStats.add(locationStats);
+            locationStatsAccessService.save(locationStats);
+            locationStatsAccessService.
         }
-        this.allStats = newStats;
+
+    }
+
+    @Transactional
+    public void updataData(){
+
+    }
+
+    @Transactional(readOnly = true)
+    public List<LocationStats> getData(){
+        return locationStatsAccessService.findAll()
+                .stream()
+                .collect(Collectors.toList());
     }
 
 
